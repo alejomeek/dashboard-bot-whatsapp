@@ -1,13 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
-from pathlib import Path
-
-# Get the project root directory
-PROJECT_ROOT = Path(__file__).parent.parent
-
-# Path to service account credentials (local)
-CREDENTIALS_PATH = PROJECT_ROOT / "firebase-service-account.json"
 
 
 def get_firebase_credentials():
@@ -17,52 +10,47 @@ def get_firebase_credentials():
     Returns:
         credentials.Certificate: Firebase credentials object
     """
+    # Try Streamlit Cloud secrets first
     try:
-        # Try Streamlit Cloud secrets first
         import streamlit as st
 
-        # Check if we're in Streamlit Cloud (secrets available)
-        if hasattr(st, 'secrets'):
-            try:
-                if 'firebase' in st.secrets:
-                    print("[Firebase] Using Streamlit Cloud secrets")
+        print("[Firebase] Checking for Streamlit secrets...")
 
-                    # Build credentials dict from secrets
-                    cred_dict = {
-                        "type": st.secrets["firebase"]["type"],
-                        "project_id": st.secrets["firebase"]["project_id"],
-                        "private_key_id": st.secrets["firebase"]["private_key_id"],
-                        "private_key": st.secrets["firebase"]["private_key"],
-                        "client_email": st.secrets["firebase"]["client_email"],
-                        "client_id": st.secrets["firebase"]["client_id"],
-                        "auth_uri": st.secrets["firebase"]["auth_uri"],
-                        "token_uri": st.secrets["firebase"]["token_uri"],
-                        "auth_provider_x509_cert_url": st.secrets["firebase"]["auth_provider_x509_cert_url"],
-                        "client_x509_cert_url": st.secrets["firebase"]["client_x509_cert_url"],
-                        "universe_domain": st.secrets["firebase"]["universe_domain"]
-                    }
+        # Check if secrets are configured
+        if hasattr(st, 'secrets') and 'firebase' in st.secrets:
+            print("[Firebase] ✓ Using Streamlit Cloud secrets")
 
-                    return credentials.Certificate(cred_dict)
-            except Exception as secrets_error:
-                # Secrets file doesn't exist or firebase key not found
-                print(f"[Firebase] Streamlit secrets not configured: {secrets_error}")
-                pass
+            # Build credentials dict from secrets
+            firebase_creds = {
+                "type": st.secrets["firebase"]["type"],
+                "project_id": st.secrets["firebase"]["project_id"],
+                "private_key_id": st.secrets["firebase"]["private_key_id"],
+                "private_key": st.secrets["firebase"]["private_key"],
+                "client_email": st.secrets["firebase"]["client_email"],
+                "client_id": st.secrets["firebase"]["client_id"],
+                "auth_uri": st.secrets["firebase"].get("auth_uri", "https://accounts.google.com/o/oauth2/auth"),
+                "token_uri": st.secrets["firebase"].get("token_uri", "https://oauth2.googleapis.com/token"),
+                "auth_provider_x509_cert_url": st.secrets["firebase"].get("auth_provider_x509_cert_url", "https://www.googleapis.com/oauth2/v1/certs"),
+                "client_x509_cert_url": st.secrets["firebase"].get("client_x509_cert_url", ""),
+                "universe_domain": st.secrets["firebase"].get("universe_domain", "googleapis.com")
+            }
 
-    except (ImportError, KeyError, AttributeError) as e:
-        # Streamlit not available or secrets not configured
-        print(f"[Firebase] Streamlit not available: {e}")
-        pass
+            return credentials.Certificate(firebase_creds)
 
-    # Fall back to local JSON file
-    print("[Firebase] Using local service account file")
+    except Exception as e:
+        print(f"[Firebase] Could not use Streamlit secrets: {e}")
 
-    if not CREDENTIALS_PATH.exists():
+    # Fallback to local JSON file
+    json_path = os.path.join(os.path.dirname(__file__), '..', 'firebase-service-account.json')
+
+    if os.path.exists(json_path):
+        print(f"[Firebase] ✓ Using local service account file: {json_path}")
+        return credentials.Certificate(json_path)
+    else:
         raise FileNotFoundError(
-            f"Firebase credentials file not found at {CREDENTIALS_PATH}. "
+            f"Firebase credentials file not found at {json_path}. "
             "Please ensure firebase-service-account.json exists or configure Streamlit secrets."
         )
-
-    return credentials.Certificate(str(CREDENTIALS_PATH))
 
 
 # Initialize Firebase Admin SDK

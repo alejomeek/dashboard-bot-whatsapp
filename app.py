@@ -11,6 +11,9 @@ import streamlit as st
 from config.firebase import initialize_firebase
 from components.sidebar import render_sidebar
 from components.chat_view import render_chat_view, render_empty_state
+import utils.styles
+import importlib
+importlib.reload(utils.styles)
 from utils.styles import get_custom_css
 
 

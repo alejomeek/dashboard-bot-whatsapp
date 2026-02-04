@@ -5,14 +5,24 @@ Send messages via WhatsApp Cloud API.
 
 import requests
 import os
+import streamlit as st
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 # WhatsApp API credentials
-WHATSAPP_TOKEN = os.getenv('WHATSAPP_TOKEN')
-WHATSAPP_PHONE_ID = os.getenv('WHATSAPP_PHONE_ID')
+# Try to get from Streamlit secrets first, then environment variables
+try:
+    WHATSAPP_TOKEN = st.secrets.get("whatsapp", {}).get("token") or os.getenv('WHATSAPP_TOKEN')
+    WHATSAPP_PHONE_ID = st.secrets.get("whatsapp", {}).get("phone_id") or os.getenv('WHATSAPP_PHONE_ID')
+    # Optional: Business Account ID if needed later
+    WHATSAPP_BUSINESS_ACCOUNT_ID = st.secrets.get("whatsapp", {}).get("business_account_id") or os.getenv('WHATSAPP_BUSINESS_ACCOUNT_ID')
+except (FileNotFoundError, AttributeError):
+    # Fallback if secrets.toml doesn't exist (local dev without streamlit)
+    WHATSAPP_TOKEN = os.getenv('WHATSAPP_TOKEN')
+    WHATSAPP_PHONE_ID = os.getenv('WHATSAPP_PHONE_ID')
+    WHATSAPP_BUSINESS_ACCOUNT_ID = os.getenv('WHATSAPP_BUSINESS_ACCOUNT_ID')
 
 # WhatsApp Cloud API endpoint
 WHATSAPP_API_URL = f"https://graph.facebook.com/v18.0/{WHATSAPP_PHONE_ID}/messages"

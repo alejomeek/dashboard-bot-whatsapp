@@ -27,8 +27,15 @@ def format_timestamp(timestamp):
             dt = timestamp
         else:
             dt = timestamp
+        
+        # Adjust for Timezone (UTC to UTC-5 for Colombia)
+        from datetime import timedelta
+        
+        # If naive (no tz), assume it's UTC or whatever DB stored
+        # If aware, confirm logic. Assuming DB sends UTC and we want UTC-5
+        dt = dt - timedelta(hours=5)
 
-        # Remove timezone info for comparison if present
+        # Remove timezone info for comparison if present (make naive for calc)
         if hasattr(dt, 'replace') and dt.tzinfo is not None:
             dt = dt.replace(tzinfo=None)
 

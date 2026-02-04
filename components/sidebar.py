@@ -141,11 +141,8 @@ def render_conversation_item(conversation, is_selected=False):
     # Bold text for human mode or unresolved
     is_bold = mode == 'human' and status == 'active'
 
-    # Format phone number (show last 7 digits)
-    if len(phone) > 7:
-        display_phone = "..." + phone[-7:]
-    else:
-        display_phone = phone
+    # Format phone number (show full number)
+    display_phone = phone
 
     # Build conversation text
     if is_bold:

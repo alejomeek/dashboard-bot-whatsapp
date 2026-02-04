@@ -101,15 +101,19 @@ def render_chat_view(phone_number):
         return
 
     # Header with conversation info
-    col1, col2 = st.columns([3, 1])
+    col1, col2, col3 = st.columns([6, 1, 1])
 
     with col1:
         st.header(f"💬 Conversación: {phone_number}")
-
+    
     with col2:
+        if st.button("🔄", help="Actualizar mensajes"):
+            st.rerun()
+
+    with col3:
         # Delete conversation button
-        if st.button("🗑️ Borrar", type="secondary", key="delete_btn"):
-            st.session_state.show_delete_confirm = True
+        if st.button("🗑️", type="secondary", key="delete_btn", help="Borrar conversación"):
+             st.session_state.show_delete_confirm = True
 
     # Show delete confirmation dialog
     if st.session_state.get('show_delete_confirm', False):

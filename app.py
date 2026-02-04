@@ -27,7 +27,7 @@ st.set_page_config(
 
 # Initialize theme in session state
 if 'theme' not in st.session_state:
-    st.session_state.theme = 'light'
+    st.session_state.theme = 'dark'
 
 # Load custom CSS
 st.markdown(get_custom_css(st.session_state.theme), unsafe_allow_html=True)

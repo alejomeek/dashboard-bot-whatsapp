@@ -18,10 +18,10 @@ from utils.styles import get_message_html, get_status_badge_html
 def format_message_time(timestamp):
     """
     Format message timestamp.
-
+    
     Args:
         timestamp: datetime object or Firestore timestamp
-
+        
     Returns:
         str: Formatted time (e.g., "11:30 AM")
     """
@@ -29,15 +29,33 @@ def format_message_time(timestamp):
         if timestamp is None:
             return ""
 
-        # Convert to datetime if needed
-        if hasattr(timestamp, 'strftime'):
-            dt = timestamp
+        # Convert Firestore timestamp to datetime if needed
+        dt = timestamp
+        
+        # If it's a Firestore Timestamp, convert to datetime
+        if hasattr(dt, 'to_datetime'):
+            dt = dt.to_datetime()
+        
+        # Check if naive (no timezone info), assume UTC and localize
+        if dt.tzinfo is None:
+            # We assume stored timestamps are in UTC if naive
+            # Or handle as server local time if preferred, but usually databases store UTC
+            pass
+        
+        # Basic conversion: Adjust UTC to Local Time (Colombia is UTC-5)
+        # We'll use a simple timedelta adjustment for now to avoid pytz dependency if not installed
+        # But ideally we'd use pytz: dt.astimezone(pytz.timezone('America/Bogota'))
+        
+        from datetime import timedelta
+        # If it's UTC (tz-aware), convert to naive by subtracting 5 hours
+        if dt.tzinfo is not None:
+             # Convert to UTC-5 manually
+             dt = dt - timedelta(hours=5)
         else:
-            dt = timestamp
-
-        # Remove timezone for formatting
-        if hasattr(dt, 'replace') and dt.tzinfo is not None:
-            dt = dt.replace(tzinfo=None)
+             # If naive, we assume it was UTC but lost tzinfo, or check logic
+             # In this case user says DB is 11:52PM (UTC-5) but UI shows 5:52AM (UTC)
+             # So we need to subtract 5 hours from the display
+             dt = dt - timedelta(hours=5)
 
         return dt.strftime("%I:%M %p")
 

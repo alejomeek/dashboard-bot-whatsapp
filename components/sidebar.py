@@ -158,6 +158,21 @@ def render_sidebar():
     """
     st.sidebar.title("💬 Conversaciones")
 
+    # Theme Toggle
+    if 'theme' not in st.session_state:
+        st.session_state.theme = 'light'
+
+    # Use a callback to update theme immediately
+    def on_theme_change():
+        st.session_state.theme = 'dark' if st.session_state.toggle_dark_mode else 'light'
+    
+    st.sidebar.toggle(
+        "Modo Oscuro 🌙",
+        value=(st.session_state.theme == 'dark'),
+        key="toggle_dark_mode",
+        on_change=on_theme_change
+    )
+
     # Filters section
     st.sidebar.subheader("Filtros")
 

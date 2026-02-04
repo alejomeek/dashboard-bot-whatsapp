@@ -22,8 +22,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Initialize theme in session state
+if 'theme' not in st.session_state:
+    st.session_state.theme = 'light'
+
 # Load custom CSS
-st.markdown(get_custom_css(), unsafe_allow_html=True)
+st.markdown(get_custom_css(st.session_state.theme), unsafe_allow_html=True)
 
 
 def initialize_app():

@@ -99,7 +99,9 @@ dashboard-bot-whatsapp/
 
 ## 🔧 Configuración
 
-### Variables de entorno (.env)
+### Desarrollo Local
+
+#### Variables de entorno (.env)
 
 ```bash
 # Firebase
@@ -114,10 +116,41 @@ WHATSAPP_BUSINESS_ACCOUNT_ID=tu_business_account_id
 STREAMLIT_SERVER_PORT=8501
 ```
 
-### Firebase
+#### Firebase Local
 
 Las credenciales de Firebase están en `firebase-service-account.json`.
 El proyecto de Firebase es: `whatsapp-bot-jye`
+
+**Importante:** NO subas `firebase-service-account.json` a GitHub (ya está en .gitignore)
+
+### Streamlit Cloud
+
+Para deployment en Streamlit Cloud, configura los secrets en la plataforma:
+
+1. Ve a tu app en Streamlit Cloud
+2. Settings → Secrets
+3. Añade el siguiente contenido:
+
+```toml
+[firebase]
+type = "service_account"
+project_id = "whatsapp-bot-jye"
+private_key_id = "tu_private_key_id"
+private_key = "-----BEGIN PRIVATE KEY-----\nTU_PRIVATE_KEY_AQUI\n-----END PRIVATE KEY-----\n"
+client_email = "firebase-adminsdk-xxxxx@whatsapp-bot-jye.iam.gserviceaccount.com"
+client_id = "tu_client_id"
+auth_uri = "https://accounts.google.com/o/oauth2/auth"
+token_uri = "https://oauth2.googleapis.com/token"
+auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+client_x509_cert_url = "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xxxxx%40whatsapp-bot-jye.iam.gserviceaccount.com"
+universe_domain = "googleapis.com"
+
+[whatsapp]
+token = "tu_whatsapp_token"
+phone_id = "tu_phone_id"
+```
+
+**Nota:** `config/firebase.py` detecta automáticamente si está en Streamlit Cloud y usa los secrets en lugar del archivo JSON local.
 
 ## 📊 Estado del Proyecto
 

@@ -31,7 +31,8 @@ wheels/
 firebase-service-account.json
 
 # Streamlit
-.streamlit/
+.streamlit/secrets.toml
+.streamlit/config.toml
 
 # IDE
 .vscode/
